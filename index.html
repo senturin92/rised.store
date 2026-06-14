@@ -84,30 +84,45 @@
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand(); // Разворачиваем приложение на весь экран
+       // Инициализация Telegram WebApp
+const tg = window.Telegram.WebApp;
 
-        let cart = [];
+// Функция, которая гарантирует, что WebApp полностью готов на iOS
+function initializeWebApp() {
+    tg.ready();
+    tg.expand(); // Разворачиваем на весь экран
+}
 
-        function addToCart(id, name, price) {
-            // Добавляем товар в локальную корзину
-            cart.push({ id, name, price });
-            
-            // Настраиваем главную кнопку Telegram внизу экрана (как у TGshop)
-            tg.MainButton.text = `Посмотреть корзину (${cart.length})`;
-            tg.MainButton.textColor = tg.themeParams.button_text_color;
-            tg.MainButton.color = tg.themeParams.button_color;
-            tg.MainButton.show();
-        }
+// Запускаем инициализацию сразу
+initializeWebApp();
 
-        // Обработка клика по главной кнопке Telegram "Посмотреть корзину"
-        tg.onEvent('mainButtonClicked', function(){
-            // Отправляем данные о корзине обратно в Python-бот
+let cart = [];
+
+function addToCart(id, name, price) {
+    cart.push({ id, name, price });
+    
+    // Настраиваем главную кнопку Telegram
+    tg.MainButton.text = `Посмотреть корзину (${cart.length})`;
+    tg.MainButton.textColor = tg.themeParams.button_text_color || '#ffffff';
+    tg.MainButton.color = tg.themeParams.button_color || '#000000';
+    tg.MainButton.show();
+}
+
+// Железобетонный обработчик клика для iPhone
+tg.onEvent('mainButtonClicked', function() {
+    try {
+        // Проверяем, что в корзине что-то есть
+        if (cart.length > 0) {
+            // Отправляем данные в бот
             tg.sendData(JSON.stringify(cart));
-            tg.close(); // Закрываем WebApp, дальше оформление идет в чате
-        });
+        }
+    } catch (error) {
+        alert("Ошибка отправки на iOS: " + error.message);
+    } finally {
+        // Закрываем окно в любом случае
+        tg.close();
+    }
+});
     </script>
 </body>
 </html>
