@@ -109,17 +109,22 @@ function addToCart(id, name, price) {
 }
 
 // Железобетонный обработчик клика для iPhone
+// Надежный обработчик для тестов на ПК и смартфонах
 tg.onEvent('mainButtonClicked', function() {
     try {
-        // Проверяем, что в корзине что-то есть
         if (cart.length > 0) {
-            // Отправляем данные в бот
-            tg.sendData(JSON.stringify(cart));
+            // Создаем объект заказа и добавляем уникальную метку времени (timestamp)
+            const order = {
+                order_id: Date.now(), // Это сделает каждый запрос уникальным для Telegram
+                items: cart
+            };
+            
+            // Отправляем уникальную строку в бот
+            tg.sendData(JSON.stringify(order));
         }
     } catch (error) {
-        alert("Ошибка отправки на iOS: " + error.message);
+        alert("Ошибка: " + error.message);
     } finally {
-        // Закрываем окно в любом случае
         tg.close();
     }
 });
