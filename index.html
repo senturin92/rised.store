@@ -111,21 +111,27 @@ function addToCart(id, name, price) {
 // Железобетонный обработчик клика для iPhone
 // Надежный обработчик для тестов на ПК и смартфонах
 tg.onEvent('mainButtonClicked', function() {
-    try {
-        if (cart.length > 0) {
-            // Создаем объект заказа и добавляем уникальную метку времени (timestamp)
-            const order = {
-                order_id: Date.now(), // Это сделает каждый запрос уникальным для Telegram
-                items: cart
-            };
-            
-            // Отправляем уникальную строку в бот
-            tg.sendData(JSON.stringify(order));
-        }
-    } catch (error) {
-        alert("Ошибка: " + error.message);
-    } finally {
-        tg.close();
+    if (cart.length > 0) {
+        const orderData = {
+            user_id: tg.initDataUnsafe.user?.id,
+            username: tg.initDataUnsafe.user?.username,
+            items: cart
+        };
+
+        // Отправляем данные напрямую на твой новый сервер Рег.ру 👇
+        fetch('http://80.78.244.159:8080/webhook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => {
+            if (response.ok) {
+                tg.close(); // Закрываем магазин, так как сервер заказ принял
+            } else {
+                alert("Ошибка создания заказа на сервере");
+            }
+        })
+        .catch(error => alert("Ошибка сети: " + error.message));
     }
 });
     </script>
