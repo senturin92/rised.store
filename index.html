@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rised Shop</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            margin: 0;
+            padding: 15px;
+        }
+        .brand-title {
+            font-size: 24px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .product-card {
+            background: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .product-img {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .product-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 8px 0 4px 0;
+        }
+        .product-price {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #000);
+            margin-bottom: 8px;
+        }
+        .btn-add {
+            background-color: var(--tg-theme-button-color, #000);
+            color: var(--tg-theme-button-text-color, #fff);
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="brand-title">RISED</div>
+
+    <div class="products-grid">
+        <div class="product-card" id="prod_1">
+            <img src="https://link-to-your-photo.com/item1.jpg" class="product-img" alt="Товар">
+            <div class="product-name">Футболка Размахайка Black</div>
+            <div class="product-price">3 500 ₽</div>
+            <button class="btn-add" onclick="addToCart(1, 'Футболка Размахайка', 3500)">В корзину</button>
+        </div>
+        
+        <div class="product-card" id="prod_2">
+            <img src="https://link-to-your-photo.com/item2.jpg" class="product-img" alt="Товар">
+            <div class="product-name">Зип-худи Athletic</div>
+            <div class="product-price">6 200 ₽</div>
+            <button class="btn-add" onclick="addToCart(2, 'Зип-худи Athletic', 6200)">В корзину</button>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand(); // Разворачиваем приложение на весь экран
+
+        let cart = [];
+
+        function addToCart(id, name, price) {
+            // Добавляем товар в локальную корзину
+            cart.push({ id, name, price });
+            
+            // Настраиваем главную кнопку Telegram внизу экрана (как у TGshop)
+            tg.MainButton.text = `Посмотреть корзину (${cart.length})`;
+            tg.MainButton.textColor = tg.themeParams.button_text_color;
+            tg.MainButton.color = tg.themeParams.button_color;
+            tg.MainButton.show();
+        }
+
+        // Обработка клика по главной кнопке Telegram "Посмотреть корзину"
+        tg.onEvent('mainButtonClicked', function(){
+            // Отправляем данные о корзине обратно в Python-бот
+            tg.sendData(JSON.stringify(cart));
+            tg.close(); // Закрываем WebApp, дальше оформление идет в чате
+        });
+    </script>
+</body>
+</html>
